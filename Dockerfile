@@ -9,6 +9,7 @@ RUN apt-get update && \
     apt-utils \
     build-essential \
     r-base-dev \
+    vim \
     bzip2 \
     cmake \
     gcc \
