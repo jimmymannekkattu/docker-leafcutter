@@ -8,6 +8,7 @@ RUN apt-get update && \
     apt-get install -y \
     apt-utils \
     build-essential \
+    r-base-dev \
     bzip2 \
     cmake \
     gcc \
@@ -142,5 +143,14 @@ RUN R --vanilla -e 'remotes::install_github("jimmymannekkattu/leafviz")'
 WORKDIR /git/
 RUN git clone https://github.com/jimmymannekkattu/leafcutter.git
 RUN git clone https://github.com/jimmymannekkattu/leafviz.git
+RUN git clone https://github.com/jimmymannekkattu/oneTBB.git
+RUN git clone https://github.com/jimmymannekkattu/devtools.git
+RUN git clone https://github.com/jimmymannekkattu/hisat2.git
+RUN git clone https://github.com/jimmymannekkattu/htslib.git
+RUN git clone https://github.com/jimmymannekkattu/samtools.git
+RUN git clone https://github.com/jimmymannekkattu/rstantools.git
+RUN git clone https://github.com/jimmymannekkattu/htscodecs.git
+RUN git clone https://github.com/jimmymannekkattu/regtools.git
+RUN git clone https://github.com/jimmymannekkattu/RcppParallel.git
 WORKDIR /
 
