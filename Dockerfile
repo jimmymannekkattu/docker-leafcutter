@@ -1,5 +1,5 @@
 FROM ubuntu:latest
-MAINTAINER Jimmy John Thomas <jimmymannekkattu@gmail.com>
+LABEL Jimmy John Thomas <jimmymannekkattu@gmail.com>
 
 LABEL \
     description="Image for use with LeafCutter https://github.com/davidaknowles/leafcutter"
@@ -16,6 +16,9 @@ RUN apt-get update && \
     gfortran \
     git \
     curl \
+    texlive \ 
+    texinfo \
+    texlive-latex-extra \
     libcurl4-openssl-dev \
     libbz2-dev \
     libgsl-dev \
@@ -30,6 +33,7 @@ RUN apt-get update && \
     build-essential \
     libcurl4-openssl-dev \
     libssl-dev \
+    libtbb-dev \
     libxml2-dev \
     zlib1g-dev \
     gfortran \
@@ -38,6 +42,7 @@ RUN apt-get update && \
     libpcre2-dev \
     make \
     cmake \
+    locate \
     ncurses-dev \
     libssl-dev \
     wget \
@@ -51,6 +56,7 @@ RUN apt-get update && \
     libfontconfig1-dev \
     lynx \
     evince \
+    hisat2 \
     libxml2-dev \
     gfortran \
     libreadline-dev \
@@ -109,7 +115,7 @@ RUN ln -s $HTSLIB_INSTALL_DIR/bin/tabix /usr/bin/tabix
 ##########
 #Regtools#
 ##########
-WORKDIR /tmp
+WORKDIR /git/regtools
 RUN git clone https://github.com/jimmymannekkattu/regtools.git && \
     cd regtools/ && \
     mkdir build && \
@@ -132,26 +138,50 @@ RUN wget https://cran.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz && \
     make && \
     make install
 
+WORKDIR /git/
+RUN git clone https://github.com/jimmymannekkattu/oneTBB.git
+
+# Create binary directory for out-of-source build
+RUN mkdir -p /git/oneTBB/build && cd /git/oneTBB/build \
+    && cmake -DCMAKE_INSTALL_PREFIX=/tbb -DTBB_TEST=OFF /git/oneTBB
+
+# Build the project
+RUN cmake --build /git/oneTBB/build
+
+# Install the library
+RUN cmake --install /git/oneTBB/build
+
+WORKDIR /git/
+RUN git clone https://github.com/jimmymannekkattu/tbb.git
+
+ENV CPLUS_INCLUDE_PATH=/git/oneTBB/include:$CPLUS_INCLUDE_PATH
+ENV CPLUS_INCLUDE_PATH=/git/tbb/include:$CPLUS_INCLUDE_PATH
+
 #########################
 # R and python packages #
 #########################
 RUN R --vanilla -e 'install.packages(c("BiocManager", "remotes", "rstan", "ragg", "systemfonts"), repos = "http://cran.us.r-project.org")'
-RUN R --vanilla -e 'BiocManager::install(c("Biobase", "DirichletMultinomial", "Hmisc"))'
+
 RUN R -e "install.packages('devtools', repos='https://cran.r-project.org')"
+#RUN R -e 'devtools::install_version("BiocManager", version = "1.30.16", repos = "http://cran.us.r-project.org")'
+#RUN R --vanilla -e 'install.packages(c("BiocManager"), repos = "http://cran.us.r-project.org")'
+RUN R --vanilla -e 'devtools::install_version("BiocManager", version = "1.30.16", repos = "https://cloud.r-project.org")'
+RUN R --vanilla -e 'BiocManager::install(c("Biobase", "DirichletMultinomial", "Hmisc"))'
 RUN R --vanilla -e 'devtools::install_github("jimmymannekkattu/leafcutter/leafcutter")'
 RUN R --vanilla -e 'remotes::install_github("jimmymannekkattu/leafviz")'
 
 WORKDIR /git/
 RUN git clone https://github.com/jimmymannekkattu/leafcutter.git
 RUN git clone https://github.com/jimmymannekkattu/leafviz.git
-RUN git clone https://github.com/jimmymannekkattu/oneTBB.git
 RUN git clone https://github.com/jimmymannekkattu/devtools.git
 RUN git clone https://github.com/jimmymannekkattu/hisat2.git
 RUN git clone https://github.com/jimmymannekkattu/htslib.git
 RUN git clone https://github.com/jimmymannekkattu/samtools.git
 RUN git clone https://github.com/jimmymannekkattu/rstantools.git
 RUN git clone https://github.com/jimmymannekkattu/htscodecs.git
-RUN git clone https://github.com/jimmymannekkattu/regtools.git
 RUN git clone https://github.com/jimmymannekkattu/RcppParallel.git
+
+
+
 WORKDIR /
 
