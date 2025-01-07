@@ -174,7 +174,9 @@ RUN make stan-update
 WORKDIR /git/hisat2
 RUN make
 
-RUN apt-get install bash
+RUN apt-get -y install bash \
+python2  && \
+apt-get clean
 
 # Set the entrypoint to a bash shell for further commands
 #ENTRYPOINT ["/bin/bash"]
