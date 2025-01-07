@@ -1,8 +1,12 @@
-FROM ubuntu:latest
-LABEL Jimmy John Thomas <jimmymannekkattu@gmail.com>
+# Set the base image
+FROM ubuntu:20.04
 
-LABEL \
-    description="Image for use with LeafCutter https://github.com/davidaknowles/leafcutter"
+# Set non-interactive mode for installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Maintainer information
+LABEL maintainer="Jimmy John Thomas <jimmymannekkattu@gmail.com>"
+LABEL description="Image for use with LeafCutter https://github.com/davidaknowles/leafcutter"
 
 RUN apt-get update && \
     apt-get install -y \
@@ -16,7 +20,7 @@ RUN apt-get update && \
     gfortran \
     git \
     curl \
-    texlive \ 
+    texlive \
     texinfo \
     texlive-latex-extra \
     libcurl4-openssl-dev \
@@ -30,24 +34,8 @@ RUN apt-get update && \
     libssl-dev \
     libv8-dev \
     libxml2-dev \
-    build-essential \
-    libcurl4-openssl-dev \
-    libssl-dev \
     libtbb-dev \
-    libxml2-dev \
-    zlib1g-dev \
-    gfortran \
-    libreadline-dev \
     libxt-dev \
-    libpcre2-dev \
-    make \
-    cmake \
-    locate \
-    ncurses-dev \
-    libssl-dev \
-    wget \
-    build-essential \
-    libbz2-dev \
     libsqlite3-dev \
     python3 \
     python3-pip \
@@ -57,14 +45,8 @@ RUN apt-get update && \
     lynx \
     evince \
     hisat2 \
-    libxml2-dev \
-    gfortran \
-    libreadline-dev \
-    libxt-dev \
-    libpcre2-dev \  
-    libssl-dev \
+    wget \
     libfreetype6-dev \
-    libpng-dev \
     libtiff5-dev \
     libjpeg-dev \
     zlib1g-dev && \
@@ -74,7 +56,7 @@ RUN apt-get update && \
 RUN python3 --version
 
 ########
-#HTSlib#
+# HTSlib
 ########
 ENV HTSLIB_INSTALL_DIR=/opt/htslibA
 ENV HTSLIB_VERSION="1.21"
@@ -84,15 +66,16 @@ RUN wget https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/
     tar --bzip2 -xvf htslib-${HTSLIB_VERSION}.tar.bz2
 
 WORKDIR /tmp/htslib-${HTSLIB_VERSION}
-RUN ./configure  --enable-plugins --prefix=$HTSLIB_INSTALL_DIR && \
+RUN ./configure --enable-plugins --prefix=$HTSLIB_INSTALL_DIR && \
     make && \
     make install && \
     cp $HTSLIB_INSTALL_DIR/lib/libhts.so* /usr/lib/
+
 WORKDIR /tmp
 RUN rm -rf /tmp/*
 
 ##########
-#Samtools#
+# Samtools
 ##########
 ENV SAMTOOLS_INSTALL_DIR=/opt/samtools
 ENV SAMTOOLS_VERSION="1.21"
@@ -108,14 +91,14 @@ WORKDIR /
 RUN rm -rf /tmp/*
 
 #######
-#tabix#
+# Tabix
 #######
 RUN ln -s $HTSLIB_INSTALL_DIR/bin/tabix /usr/bin/tabix
 
 ##########
-#Regtools#
+# Regtools
 ##########
-WORKDIR /git/regtools
+WORKDIR /git
 RUN git clone https://github.com/jimmymannekkattu/regtools.git && \
     cd regtools/ && \
     mkdir build && \
@@ -126,7 +109,7 @@ RUN git clone https://github.com/jimmymannekkattu/regtools.git && \
     mv regtools /opt/regtools/
 
 #####
-# R #
+# R
 #####
 ENV R_INSTALL_DIR=/usr/local/
 ENV R_VERSION="4.4.2"
@@ -134,7 +117,7 @@ ENV R_VERSION="4.4.2"
 RUN wget https://cran.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz && \
     tar -zxvf R-${R_VERSION}.tar.gz && \
     cd R-${R_VERSION} && \
-    ./configure --prefix=${R_INSTALL_DIR} --with-x=no  --with-curl=/usr/bin/curl-config && \
+    ./configure --prefix=${R_INSTALL_DIR} --with-x=no --with-curl=/usr/bin/curl-config && \
     make && \
     make install
 
@@ -142,8 +125,8 @@ WORKDIR /git/
 RUN git clone https://github.com/jimmymannekkattu/oneTBB.git
 
 # Create binary directory for out-of-source build
-RUN mkdir -p /git/oneTBB/build && cd /git/oneTBB/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=/tbb -DTBB_TEST=OFF /git/oneTBB
+RUN mkdir -p /git/oneTBB/build && cd /git/oneTBB/build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/tbb -DTBB_TEST=OFF /git/oneTBB
 
 # Build the project
 RUN cmake --build /git/oneTBB/build
@@ -158,33 +141,39 @@ ENV CPLUS_INCLUDE_PATH=/git/oneTBB/include:$CPLUS_INCLUDE_PATH
 ENV CPLUS_INCLUDE_PATH=/git/tbb/include:$CPLUS_INCLUDE_PATH
 
 #########################
-# R and python packages #
+# R and Python packages
 #########################
-RUN R --vanilla -e 'install.packages(c("BiocManager", "remotes", "rstan", "ragg", "systemfonts"), repos = "http://cran.us.r-project.org")'
+RUN R --vanilla -e 'install.packages(c("BiocManager", "remotes", "rstan", "ragg", "systemfonts", "rstantools"), repos = "http://cran.us.r-project.org")'
 
 RUN R -e "install.packages('devtools', repos='https://cran.r-project.org')"
-#RUN R -e 'devtools::install_version("BiocManager", version = "1.30.16", repos = "http://cran.us.r-project.org")'
-#RUN R --vanilla -e 'install.packages(c("BiocManager"), repos = "http://cran.us.r-project.org")'
 RUN R --vanilla -e 'devtools::install_version("BiocManager", version = "1.30.16", repos = "https://cloud.r-project.org")'
 RUN R --vanilla -e 'BiocManager::install(c("Biobase", "DirichletMultinomial", "Hmisc"))'
 RUN R --vanilla -e 'devtools::install_github("jimmymannekkattu/leafcutter/leafcutter")'
 RUN R --vanilla -e 'remotes::install_github("jimmymannekkattu/leafviz")'
 
 WORKDIR /git/
-RUN git clone https://github.com/jimmymannekkattu/leafcutter.git
-RUN git clone https://github.com/jimmymannekkattu/leafviz.git
-RUN git clone https://github.com/jimmymannekkattu/devtools.git
-RUN git clone https://github.com/jimmymannekkattu/hisat2.git
-RUN git clone https://github.com/jimmymannekkattu/htslib.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/samtools.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/rstantools.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/htscodecs.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/RcppParallel.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/stan.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/math.git
-RUN git clone --recursive https://github.com/jimmymannekkattu/cmdstan.git
 
+RUN git clone --recursive https://github.com/jimmymannekkattu/leafcutter.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/leafviz.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/devtools.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/hisat2.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/htslib.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/samtools.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/rstantools.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/htscodecs.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/RcppParallel.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/stan.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/math.git && \
+    git clone --recursive https://github.com/jimmymannekkattu/cmdstan.git
 
+# Update Stan within CmdStan
+WORKDIR /git/cmdstan
+RUN make stan-update
 
-WORKDIR /
+WORKDIR /git/hisat2
+RUN make
 
+# Set the entrypoint to a bash shell for further commands
+ENTRYPOINT ["/bin/bash"]
+
+CMD ["/bin/bash"]
