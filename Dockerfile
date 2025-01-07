@@ -12,6 +12,7 @@ RUN apt-get update && \
     apt-get install -y \
     apt-utils \
     build-essential \
+    bash \
     r-base-dev \
     vim \
     bzip2 \
