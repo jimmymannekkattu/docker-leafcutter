@@ -176,10 +176,13 @@ RUN git clone https://github.com/jimmymannekkattu/leafviz.git
 RUN git clone https://github.com/jimmymannekkattu/devtools.git
 RUN git clone https://github.com/jimmymannekkattu/hisat2.git
 RUN git clone https://github.com/jimmymannekkattu/htslib.git
-RUN git clone https://github.com/jimmymannekkattu/samtools.git
-RUN git clone https://github.com/jimmymannekkattu/rstantools.git
-RUN git clone https://github.com/jimmymannekkattu/htscodecs.git
-RUN git clone https://github.com/jimmymannekkattu/RcppParallel.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/samtools.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/rstantools.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/htscodecs.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/RcppParallel.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/stan.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/math.git
+RUN git clone --recursive https://github.com/jimmymannekkattu/cmdstan.git
 
 
 
