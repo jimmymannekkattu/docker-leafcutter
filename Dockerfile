@@ -174,7 +174,9 @@ RUN make stan-update
 WORKDIR /git/hisat2
 RUN make
 
-# Set the entrypoint to a bash shell for further commands
-ENTRYPOINT ["/bin/bash"]
+RUN apt-get install bash
 
+# Set the entrypoint to a bash shell for further commands
+#ENTRYPOINT ["/bin/bash"]
+WORKDIR /
 CMD ["/bin/bash"]
