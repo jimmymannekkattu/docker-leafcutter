@@ -113,9 +113,9 @@ RUN git clone https://github.com/jimmymannekkattu/regtools.git && \
 # R
 #####
 ENV R_INSTALL_DIR=/usr/local/
-ENV R_VERSION="4.4.2"
+ENV R_VERSION="3.6.0"
 
-RUN wget https://cran.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz && \
+RUN wget https://cran.r-project.org/src/base/R-3/R-${R_VERSION}.tar.gz && \
     tar -zxvf R-${R_VERSION}.tar.gz && \
     cd R-${R_VERSION} && \
     ./configure --prefix=${R_INSTALL_DIR} --with-x=no --with-curl=/usr/bin/curl-config && \
