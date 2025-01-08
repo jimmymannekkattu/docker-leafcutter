@@ -16,6 +16,7 @@ RUN apt-get update && \
     r-base-dev \
     vim \
     bzip2 \
+    default-jdk \
     cmake \
     gcc \
     gfortran \
